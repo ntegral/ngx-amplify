@@ -1,27 +1,76 @@
-# NgxAmplifyStarter
+# ngx-amplify
+An angular library for integration AWS cloud services (cognito)
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 8.3.16.
+[![npm version](http://img.shields.io/npm/v/@ntegral/ngx-amplify.svg?style=flat)](https://npmjs.org/package/@ntegral/ngx-amplify "View this project on npm")
+[![ISC license](http://img.shields.io/badge/license-ISC-brightgreen.svg)](http://opensource.org/licenses/ISC)
 
-## Development server
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+## Table Of Contents
 
-## Code scaffolding
+- [Installation](#installation)
+- [Getting Started](#getting-started)
+- [Contributing](#contributing)
+- [License](#license)
+- [Acknowledgements](#acknowledgements)
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
 
-## Build
+## Installation
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
+```bash
+npm install --save ngx-amplify amazon-cognito-identity-js amazon-cognito-identity-js-typescript
+```
 
-## Running unit tests
+## Getting Started
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+The simplest way to use `ngx-amplify` is to use `NgxAmplifyModule.forRoot`
 
-## Running end-to-end tests
+```typescript
+import { NgxAmplifyModule } from 'ngx-amplify';
 
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
+@Module({
+  imports: [
+    NgxAmplifyModule.forRoot({
+      region:'us-east-x',
+      userPoolId: 'us-east-1_kT3FBpRxA',
+      appId: '1r9vg3ob81jamk62mjepejd3db',
+      idpUrl: `cognito-idp.us-east-x.amazonaws.com`,
+      identityPoolId: 'us-east-1:08f3112b-cc65-49e4-8063-81f16cccd1ax'
+    }),
+  ],
+})
+export class AppModule {}
+```
 
-## Further help
+add the following code to the polyfill.ts file 
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
+```typescript
+ * APPLICATION IMPORTS
+ */
+(window as any).global = window;
+(window as any).process = {
+  env: { DEBUG: undefined },
+};
+```
+
+## Contributing
+
+I would greatly appreciate any contributions to make this project better. Please
+make sure to follow the below guidelines before getting your hands dirty.
+
+1. Fork the repository
+2. Create your branch (`git checkout -b my-branch`)
+3. Commit any changes to your branch
+4. Push your changes to your remote branch
+5. Open a pull request
+
+## License
+
+Distributed under the ISC License. See `LICENSE` for more information.
+
+## Acknowledgements
+
+- [ntegral inc](http://www.ntegral.com)
+- [aws](https://aws.amazon.com)
+
+Copyright &copy; 2019 Ntegral Inc.
+

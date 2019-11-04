@@ -4,7 +4,7 @@ import * as AWS from 'aws-sdk';
 import { ICognitoUserPoolData, CognitoUserPool, CognitoUser, AuthenticationDetails, CognitoUserSession, CognitoUserAttribute, ICognitoUserAttributeData, UserData, ISignUpResult } from 'amazon-cognito-identity-js';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { CognitoException, CognitoProfile, AuthUser } from '../common/common.resource';
-import { IAuthState, IAuthUser } from 'ngx-amplify/lib/common';
+import { IAuthState, IAuthUser } from '../common/';
 
 @Injectable({
   providedIn: 'root'
@@ -35,9 +35,8 @@ export class AuthService {
     this.userPool = new CognitoUserPool(this.poolData);
     this.user = AuthUser.Factory();
     this.refreshOrResetCreds();
-    console.log('current cognitoUser', this.cognitoUser);
-    console.log('current authUser', this.user);
-
+    // console.log('current cognitoUser', this.cognitoUser);
+    // console.log('current authUser', this.user);
   }
 
   private authDetails(creds: ICognitoCredentials): AuthenticationDetails {
@@ -179,7 +178,7 @@ export class AuthService {
 
     if (this.cognitoUser !== null) {
       let session = await this.refreshSession();
-      console.log('refreshOrResetCreds:result',session);
+      // console.log('refreshOrResetCreds:result',session);
     } else {
       this.resetCreds();
     }
@@ -234,7 +233,7 @@ export class AuthService {
       try {
         cognitoUser.authenticateUser(self.authDetails(creds), {
           onSuccess: async(session: CognitoUserSession) => {
-            console.log(`Signed in user ${cognitoUser.getUsername()}. Sessiong valid?: `, session.isValid());
+            // console.log(`Signed in user ${cognitoUser.getUsername()}. Sessiong valid?: `, session.isValid());
             let user = await self.saveCreds(cognitoUser, session);
             resolve(user);
           },
@@ -399,7 +398,7 @@ export class AuthService {
     let self = this;
     let cognitoUser = this.userPool.getCurrentUser();
     if (cognitoUser) {
-      console.log('made it this far..');
+      // console.log('made it this far..');
       
       cognitoUser.signOut();
       self.authState.next({state:'signedOut', user: null });
