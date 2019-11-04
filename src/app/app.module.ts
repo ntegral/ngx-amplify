@@ -12,7 +12,7 @@ import { NgxAmplifyModule } from 'projects/ngx-amplify/src/public-api';
   ],
   imports: [
     AppRoutingModule,
-    BrowserModule,
+    BrowserModule.withServerTransition({ appId: 'serverApp' }),
     FormsModule,
     ReactiveFormsModule,
     NgxAmplifyModule.forRoot({

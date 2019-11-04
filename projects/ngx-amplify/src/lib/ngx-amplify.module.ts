@@ -1,17 +1,16 @@
 import { NgModule, ModuleWithProviders } from '@angular/core';
-import { NgxAmplifyComponent } from './ngx-amplify.component';
 import { CommonModule } from '@angular/common';
 
-import { NgxAmplifyConfig, NGX_AMPLIFY_CONFIG } from './common';
+import { NgxAmplifyConfig, NGX_AMPLIFY_CONFIG } from './common/interfaces/ngx-amplify.config';
 
 
 
 @NgModule({
-  declarations: [NgxAmplifyComponent],
+  declarations: [],
   imports: [
     CommonModule
   ],
-  exports: [NgxAmplifyComponent]
+  exports: []
 })
 export class NgxAmplifyModule { 
   static forRoot(config: NgxAmplifyConfig): ModuleWithProviders {

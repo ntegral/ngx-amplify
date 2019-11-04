@@ -1,4 +1,4 @@
-import { IAuthUser, IAuthCredentials, ICognitoProfile, ICognitoException, ICognitoAddress } from './interfaces';
+import { IAuthUser, IAuthCredentials, ICognitoProfile, ICognitoException, ICognitoAddress } from './interfaces/common.interface';
 import { CognitoUser } from 'amazon-cognito-identity-js';
 
 export class AuthUser implements IAuthUser {

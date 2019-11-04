@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { NgxAmplifyService, AuthService } from 'projects/ngx-amplify/src/public-api';
+import { AuthService } from 'projects/ngx-amplify/src/public-api';
 import { FormGroup, Validators, FormBuilder } from '@angular/forms';
 
 @Component({
@@ -15,7 +15,6 @@ export class AppComponent {
   constructor(
     private auth: AuthService,
     private fb: FormBuilder,
-    private service: NgxAmplifyService,
   ) {
     this.buildForm();
   }

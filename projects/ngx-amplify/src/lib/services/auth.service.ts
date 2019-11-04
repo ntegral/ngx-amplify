@@ -1,10 +1,10 @@
 import { Injectable, Inject } from '@angular/core';
-import { NgxAmplifyConfig, NGX_AMPLIFY_CONFIG, ICognitoCredentials, ICognitoException, ICognitoSignUpCredentials, ICognitoProfile } from '../common';
+import { NgxAmplifyConfig, NGX_AMPLIFY_CONFIG } from '../common/interfaces/ngx-amplify.config';
 import * as AWS from 'aws-sdk';
 import { ICognitoUserPoolData, CognitoUserPool, CognitoUser, AuthenticationDetails, CognitoUserSession, CognitoUserAttribute, ICognitoUserAttributeData, UserData, ISignUpResult } from 'amazon-cognito-identity-js';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { CognitoException, CognitoProfile, AuthUser } from '../common/common.resource';
-import { IAuthState, IAuthUser } from '../common/';
+import { IAuthState, IAuthUser, ICognitoCredentials, ICognitoException, ICognitoSignUpCredentials, ICognitoProfile } from '../common/interfaces/common.interface';
 
 @Injectable({
   providedIn: 'root'
