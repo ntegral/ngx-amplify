@@ -1,7 +1,7 @@
 # ngx-amplify
 An angular library for integration AWS cloud services (cognito)
 
-[![npm version](http://img.shields.io/npm/v/@ntegral/ngx-amplify.svg?style=flat)](https://npmjs.org/package/@ntegral/ngx-amplify "View this project on npm")
+[![npm version](http://img.shields.io/npm/v/ngx-amplify.svg?style=flat)](https://npmjs.org/package/ngx-amplify "View this project on npm")
 [![ISC license](http://img.shields.io/badge/license-ISC-brightgreen.svg)](http://opensource.org/licenses/ISC)
 
 
