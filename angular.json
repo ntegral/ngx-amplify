@@ -124,6 +124,41 @@
           }
         }
       }
+    },
+    "ngx-amplify": {
+      "projectType": "library",
+      "root": "projects/ngx-amplify",
+      "sourceRoot": "projects/ngx-amplify/src",
+      "prefix": "ngx-amplify",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-ng-packagr:build",
+          "options": {
+            "tsConfig": "projects/ngx-amplify/tsconfig.lib.json",
+            "project": "projects/ngx-amplify/ng-package.json"
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "projects/ngx-amplify/src/test.ts",
+            "tsConfig": "projects/ngx-amplify/tsconfig.spec.json",
+            "karmaConfig": "projects/ngx-amplify/karma.conf.js"
+          }
+        },
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "projects/ngx-amplify/tsconfig.lib.json",
+              "projects/ngx-amplify/tsconfig.spec.json"
+            ],
+            "exclude": [
+              "**/node_modules/**"
+            ]
+          }
+        }
+      }
     }},
   "defaultProject": "ngx-amplify-starter"
 }
