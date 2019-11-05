@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
-import { AuthService } from 'projects/ngx-amplify/src/public-api';
 import { FormGroup, Validators, FormBuilder } from '@angular/forms';
+import { AuthService } from 'projects/ngx-amplify/src/public-api';
 
 @Component({
   selector: 'app-root',

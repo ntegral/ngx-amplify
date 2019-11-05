@@ -4,13 +4,13 @@ import { CommonModule } from '@angular/common';
 import { NgxAmplifyConfig, NGX_AMPLIFY_CONFIG } from './common/interfaces/ngx-amplify.config';
 
 
-
 @NgModule({
   declarations: [],
   imports: [
     CommonModule
   ],
-  exports: []
+  exports: [],
+  providers: []
 })
 export class NgxAmplifyModule { 
   static forRoot(config: NgxAmplifyConfig): ModuleWithProviders {

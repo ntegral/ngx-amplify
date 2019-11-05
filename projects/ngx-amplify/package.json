@@ -1,6 +1,6 @@
 {
   "name": "ngx-amplify",
-  "version": "0.0.5",
+  "version": "0.0.9",
   "description": "An angular library for integration AWS cloud services (cognito)",
   "author": "Ntegral Inc.",
   "repository": {
