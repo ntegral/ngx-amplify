@@ -394,15 +394,25 @@ export class AuthService {
   }
 
 
-  signOut() {
+  signOut(): Promise<string> {
     let self = this;
-    let cognitoUser = this.userPool.getCurrentUser();
-    if (cognitoUser) {
-      // console.log('made it this far..');
-      
-      cognitoUser.signOut();
-      self.authState.next({state:'signedOut', user: null });
-      this.resetCreds(true);
+    
+    if (self.cognitoUser) {
+      let username = self.cognitoUser.getUsername();
+
+      return new Promise((resolve, reject) => {
+        try {
+          self.cognitoUser.signOut();
+          self.cognitoUserSub.next(null);
+          self.authState.next({state:'signedOut', user: null });
+          self.resetCreds(true);
+          self.user = AuthUser.Factory();
+          resolve('signOut successful');
+        } 
+        catch (error) {
+          reject(self.handleError(error, 'try/catch signOut'));
+        }
+      })
     }
   }
 }
