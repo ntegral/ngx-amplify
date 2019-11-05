@@ -4,7 +4,7 @@ import * as AWS from 'aws-sdk';
 import { ICognitoUserPoolData, CognitoUserPool, CognitoUser, AuthenticationDetails, CognitoUserSession, CognitoUserAttribute, ICognitoUserAttributeData, UserData, ISignUpResult } from 'amazon-cognito-identity-js';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { CognitoException, CognitoProfile, AuthUser } from '../common/common.resource';
-import { IAuthState, IAuthUser, ICognitoCredentials, ICognitoException, ICognitoSignUpCredentials, ICognitoProfile } from '../common/interfaces/common.interface';
+import { IAuthState, IAuthUser, ICognitoCredentials, ICognitoException, ICognitoSignUpCredentials, ICognitoProfile, IAuthUserState } from '../common/interfaces/common.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -17,6 +17,9 @@ export class AuthService {
 
   authState: BehaviorSubject<IAuthState> =  new BehaviorSubject({ state: 'signedOut', user: null });
   authState$: Observable<IAuthState> = this.authState.asObservable();
+
+  authUserState: BehaviorSubject<IAuthUserState> = new BehaviorSubject({ state: 'signedOut', user: null });
+  authUserState$: Observable<IAuthUserState> = this.authUserState.asObservable();
 
   cognitoUserSub: BehaviorSubject<CognitoUser> = new BehaviorSubject(null);
   cognitoUser$: Observable<CognitoUser>;
@@ -34,6 +37,7 @@ export class AuthService {
     this.poolData = { UserPoolId: config.userPoolId, ClientId: this.config.appId };
     this.userPool = new CognitoUserPool(this.poolData);
     this.user = AuthUser.Factory();
+    this.authUserState.next({ state: 'signedOut', user: this.user });
     this.refreshOrResetCreds();
     // console.log('current cognitoUser', this.cognitoUser);
     // console.log('current authUser', this.user);
@@ -173,7 +177,14 @@ export class AuthService {
     this.setCredentials(this.unauthCreds)
   }
 
-  private async refreshOrResetCreds() {
+  async currentAuthUser(): Promise<IAuthUser> {
+    let self = this;
+
+    let result = await self.refreshOrResetCreds();
+    return self.user;
+  }
+
+  async refreshOrResetCreds() {
     this.cognitoUser = this.userPool.getCurrentUser();
 
     if (this.cognitoUser !== null) {
@@ -192,7 +203,7 @@ export class AuthService {
       console.log(`${new Date()} - Refreshed session for ${self.cognitoUser.getUsername()}. Valid?: `, session.isValid());
       this.session = session;
       this.cognitoUser.setSignInUserSession(session);
-      await this.saveCreds(self.cognitoUser);
+      await this.saveCreds(self.cognitoUser, session);
       return session;
     })
   }
@@ -213,6 +224,7 @@ export class AuthService {
       self.cognitoUser$ = self.cognitoUserSub.asObservable();
       self.user.cognitoProfile = CognitoProfile.Factory();
       await self.setCognitoProfile(cognitoUser);
+      self.authUserState.next({ state: 'signedIn', user: self.user });
     }
 
     self.setCredentials(self.buildCreds());
@@ -407,6 +419,7 @@ export class AuthService {
           self.authState.next({state:'signedOut', user: null });
           self.resetCreds(true);
           self.user = AuthUser.Factory();
+          self.authUserState.next({state: 'signedOut', user: null });
           resolve('signOut successful');
         } 
         catch (error) {

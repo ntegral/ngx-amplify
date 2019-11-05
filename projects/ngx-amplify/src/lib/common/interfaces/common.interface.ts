@@ -17,8 +17,13 @@ export interface IAuthUser {
 }
 
 export interface IAuthState {
-    state: IAuthStateOptions;
+    state: IAuthStateOptions,
     user: CognitoUser
+}
+
+export interface IAuthUserState {
+    state: IAuthStateOptions,
+    user: IAuthUser
 }
 
 export interface IAuthResponse {
