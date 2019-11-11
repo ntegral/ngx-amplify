@@ -15,14 +15,14 @@ export class AuthService {
   private userPool: CognitoUserPool;
   private unauthCreds: any;
 
-  authState: BehaviorSubject<IAuthState> =  new BehaviorSubject({ state: 'signedOut', user: null });
+  private authState: BehaviorSubject<IAuthState> =  new BehaviorSubject({ state: 'signedOut', user: null });
   authState$: Observable<IAuthState> = this.authState.asObservable();
 
-  authUserState: BehaviorSubject<IAuthUserState> = new BehaviorSubject({ state: 'signedOut', user: null });
+  private authUserState: BehaviorSubject<IAuthUserState> = new BehaviorSubject({ state: 'signedOut', user: null });
   authUserState$: Observable<IAuthUserState> = this.authUserState.asObservable();
 
-  cognitoUserSub: BehaviorSubject<CognitoUser> = new BehaviorSubject(null);
-  cognitoUser$: Observable<CognitoUser>;
+  private cognitoUserSub: BehaviorSubject<CognitoUser> = new BehaviorSubject(null);
+  cognitoUser$: Observable<CognitoUser> = this.cognitoUserSub.asObservable();
   cognitoUser: CognitoUser;
   user: IAuthUser;
 
@@ -39,8 +39,6 @@ export class AuthService {
     this.user = AuthUser.Factory();
     this.authUserState.next({ state: 'signedOut', user: this.user });
     this.refreshOrResetCreds();
-    // console.log('current cognitoUser', this.cognitoUser);
-    // console.log('current authUser', this.user);
   }
 
   private authDetails(creds: ICognitoCredentials): AuthenticationDetails {
@@ -221,7 +219,6 @@ export class AuthService {
       self.user.cognitoUser = cognitoUser;
       self.authState.next({state: 'signedIn', user: cognitoUser });
       self.cognitoUserSub.next(cognitoUser);
-      self.cognitoUser$ = self.cognitoUserSub.asObservable();
       self.user.cognitoProfile = CognitoProfile.Factory();
       await self.setCognitoProfile(cognitoUser);
       self.authUserState.next({ state: 'signedIn', user: self.user });
