@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FormGroup, Validators, FormBuilder } from '@angular/forms';
-import { AuthService } from 'projects/ngx-amplify/src/public-api';
+import { StorageService, AuthService, IAuthUser, AuthUser } from 'ngx-amplify';
 
 @Component({
     selector: 'app-root',
@@ -10,9 +10,36 @@ import { AuthService } from 'projects/ngx-amplify/src/public-api';
 export class AppComponent {
     title = 'ngx-amplify-starter';
     loginForm: FormGroup;
+    authUser: IAuthUser = AuthUser.Factory()
 
-    constructor(private auth: AuthService, private fb: FormBuilder) {
+    constructor(
+        private storage: StorageService,
+        private auth: AuthService, 
+        private fb: FormBuilder) {
         this.buildForm();
+
+        this.storage.getFile('ufc-atlanta.jpg','events').then(
+            (result) => {
+                console.log('file location', result);
+            }
+        ).catch(
+            (err) => { console.error('err getting file', err)}
+        );
+
+        // this.storage.list('public/events/').catch((err) => { console.log('err listing files', err)});
+
+        this.auth.currentAuthUser().then(
+            (user) => {
+                console.log('authUser', user);
+                this.authUser = Object.assign({},this.authUser, user);
+            }
+        )
+
+        /* this.auth.authUserState$.subscribe((data) => {
+            console.log('data:sub', data);
+        },(err) => {
+            console.log('data:sub:err',err);
+        }) */
     }
 
     buildForm() {
@@ -42,6 +69,7 @@ export class AppComponent {
                 .signIn(self.loginForm.value)
                 .then(result => {
                     console.log('authUser', result);
+                    this.authUser = Object.assign({},this.authUser, result);
                 })
                 .catch(err => {
                     console.error('signIn', err);
@@ -50,7 +78,9 @@ export class AppComponent {
 
         if (event === 'signOut') {
             console.log('signOut', event);
-            self.auth.signOut();
+            self.auth.signOut().then((result) => {
+                this.authUser = Object.assign({}, AuthUser.Factory());
+            });
         }
     }
 }

@@ -1,5 +1,5 @@
 # ngx-amplify
-An angular library for integration AWS cloud services (cognito)
+An angular library for integration AWS cloud services (cognito, s3)
 
 [![npm version](http://img.shields.io/npm/v/ngx-amplify.svg?style=flat)](https://npmjs.org/package/ngx-amplify "View this project on npm")
 [![ISC license](http://img.shields.io/badge/license-ISC-brightgreen.svg)](http://opensource.org/licenses/ISC)
@@ -34,7 +34,13 @@ import { NgxAmplifyModule } from 'ngx-amplify';
       userPoolId: 'us-east-1_kT3FBpRxA',
       appId: '1r9vg3ob81jamk62mjepejd3db',
       idpUrl: `cognito-idp.us-east-x.amazonaws.com`,
-      identityPoolId: 'us-east-1:08f3112b-cc65-49e4-8063-81f16cccd1ax'
+      identityPoolId: 'us-east-1:08f3112b-cc65-49e4-8063-81f16cccd1ax',
+      storage: {
+          bucketName: 'awsbucket',
+          bucketRegion: 'us-east-x',
+          defaultLevel: 'public',
+          folderLevel: 'public'
+      }
     }),
   ],
 })

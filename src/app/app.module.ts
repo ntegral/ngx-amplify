@@ -4,7 +4,9 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { NgxAmplifyModule } from 'projects/ngx-amplify/src/public-api';
+
+import { HTTP_INTERCEPTORS } from '@angular/common/http';
+import { NgxAmplifyModule, TokenInterceptor } from 'ngx-amplify';
 
 @NgModule({
     declarations: [AppComponent],
@@ -14,14 +16,26 @@ import { NgxAmplifyModule } from 'projects/ngx-amplify/src/public-api';
         FormsModule,
         ReactiveFormsModule,
         NgxAmplifyModule.forRoot({
-            region: 'us-east-1',
-            userPoolId: 'us-east-1_kT3FBpRxL',
-            appId: '1r9vg3ob81jamk62mjepejd3dq',
+            region: 'us-east-x',
+            userPoolId: 'us-east-1_uXitiM7tx',
+            appId: 'oj4deslvu136a6gsaoauujrx',
             idpUrl: `cognito-idp.us-east-1.amazonaws.com`,
-            identityPoolId: 'us-east-1:08f3112b-cc65-49e4-8063-81f16cccd1ab',
+            identityPoolId: 'us-east-1:7cad9b05-902e-4da5-aec2-5410fe7efc8x',
+            storage: {
+                bucketName: 'xx',
+                bucketRegion: 'us-east-x',
+                defaultLevel: 'public',
+                folderLevel: 'public'
+            }
         }),
     ],
-    providers: [],
+    providers: [
+        {
+            provide: HTTP_INTERCEPTORS,
+            useClass: TokenInterceptor,
+            multi: true
+        }
+    ],
     bootstrap: [AppComponent],
 })
 export class AppModule {}

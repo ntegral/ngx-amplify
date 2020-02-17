@@ -2,7 +2,7 @@ import { Injectable, Inject } from '@angular/core';
 import { NgxAmplifyConfig, NGX_AMPLIFY_CONFIG } from '../common/interfaces/ngx-amplify.config';
 import * as AWS from 'aws-sdk';
 import { ICognitoUserPoolData, CognitoUserPool, CognitoUser, AuthenticationDetails, CognitoUserSession, CognitoUserAttribute, ICognitoUserAttributeData, UserData, ISignUpResult } from 'amazon-cognito-identity-js';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { CognitoException, CognitoProfile, AuthUser } from '../common/common.resource';
 import { IAuthState, IAuthUser, ICognitoCredentials, ICognitoException, ICognitoSignUpCredentials, ICognitoProfile, IAuthUserState } from '../common/interfaces/common.interface';
 
@@ -14,8 +14,9 @@ export class AuthService {
   private session: CognitoUserSession;
   private userPool: CognitoUserPool;
   private unauthCreds: any;
+  private resetting: boolean = false;
 
-  private authState: BehaviorSubject<IAuthState> =  new BehaviorSubject({ state: 'signedOut', user: null });
+  private authState: BehaviorSubject<IAuthState> = new BehaviorSubject({ state: 'signedOut', user: null });
   authState$: Observable<IAuthState> = this.authState.asObservable();
 
   private authUserState: BehaviorSubject<IAuthUserState> = new BehaviorSubject({ state: 'signedOut', user: null });
@@ -37,8 +38,9 @@ export class AuthService {
     this.poolData = { UserPoolId: config.userPoolId, ClientId: this.config.appId };
     this.userPool = new CognitoUserPool(this.poolData);
     this.user = AuthUser.Factory();
-    this.authUserState.next({ state: 'signedOut', user: this.user });
-    this.refreshOrResetCreds();
+    // this.authUserState.next({ state: 'signedOut', user: this.user });
+    // this.refreshOrResetCreds();
+    this.currentAuthUser();
   }
 
   private authDetails(creds: ICognitoCredentials): AuthenticationDetails {
@@ -63,6 +65,10 @@ export class AuthService {
     let exception: ICognitoException = new CognitoException(error);
     console.error(`AWS Cognito Service::handleError callerMethod::${caller}`, exception);
     return exception;
+  }
+
+  private getCurrentUser(): CognitoUser {
+    return this.userPool.getCurrentUser();
   }
 
   private getCognitoAttributes(
@@ -101,6 +107,17 @@ export class AuthService {
     let self = this;
     let result: CognitoUser = new CognitoUser({ Username: creds.username, Pool: self.userPool });
     return result;
+  }
+
+  getJwtToken(): string {
+    let self = this;
+    let user = self.getCurrentUser();
+    let token: string;
+    
+    if (user !== null) {
+       token = user.getSignInUserSession().getAccessToken().getJwtToken();
+    }
+    return token;
   }
 
   getCognitoProfile(
@@ -166,19 +183,28 @@ export class AuthService {
   }
 
   private resetCreds (clearCache:boolean = false) {
-    console.log('Resetting credentials for unauth access')
+    console.log('Resetting credentials for unauth access');
+    this.resetting = true;
     AWS.config.region = this.config.region;
     this.cognitoUser = null;
     this.cognitoUserSub.next(null);
     this.unauthCreds = this.unauthCreds || new AWS.CognitoIdentityCredentials({ IdentityPoolId: this.config.identityPoolId });
     if (clearCache){ this.unauthCreds.clearCachedId() }
-    this.setCredentials(this.unauthCreds)
+    this.setCredentials(this.unauthCreds);
+    this.resetting = false;
   }
 
   async currentAuthUser(): Promise<IAuthUser> {
     let self = this;
 
-    let result = await self.refreshOrResetCreds();
+    let user = this.userPool.getCurrentUser();
+    if (user !== null) {
+      await this.refreshSession();
+    } /* else {
+      self.authState.next({state: 'signedOut', user: user });
+      self.cognitoUserSub.next(user);
+      self.authUserState.next({ state: 'signedOut', user: self.user });
+    } */
     return self.user;
   }
 
@@ -186,24 +212,40 @@ export class AuthService {
     this.cognitoUser = this.userPool.getCurrentUser();
 
     if (this.cognitoUser !== null) {
-      let session = await this.refreshSession();
-      // console.log('refreshOrResetCreds:result',session);
+      if (this.cognitoUser.getSignInUserSession() === null) {
+        let session = await this.refreshSession();
+      }
     } else {
       this.resetCreds();
     }
   }
 
-  private refreshSession (): Promise<CognitoUserSession> {
+  private refreshSession (user?:CognitoUser): Promise<CognitoUserSession> {
     let self = this;
+    if (user === undefined) {
+      user = this.userPool.getCurrentUser();
+    }
+    self.cognitoUser = user; // Object.assign({},user, self.cognitoUser); 
+    // console.log('self.user on refresh', self.cognitoUser);
+    // self.session = user.;
+    if (self.session && self.session.isValid) {
+      // console.log('using the current session already refreshed..');
+      self.cognitoUser.setSignInUserSession(self.session);
+      return new Promise(async(resolve) => {
+        await self.saveCreds(self.cognitoUser, self.session);
+        resolve(self.session)
+      });
+    } else {
 
-    return self.cognitoUser.getSession(async (err, session: CognitoUserSession) => {
-      if (err) { console.log('Error refreshing user session', err); return err; }
-      console.log(`${new Date()} - Refreshed session for ${self.cognitoUser.getUsername()}. Valid?: `, session.isValid());
-      this.session = session;
-      this.cognitoUser.setSignInUserSession(session);
-      await this.saveCreds(self.cognitoUser, session);
-      return session;
-    })
+      return self.cognitoUser.getSession(async (err, session: CognitoUserSession) => {
+        if (err) { console.log('Error refreshing user session', err); return err; }
+        console.log(`${new Date()} - Refreshed session for ${self.cognitoUser.getUsername()}. Valid?: `, session.isValid());
+        self.session = session;
+        self.cognitoUser.setSignInUserSession(session);
+        await self.saveCreds(self.cognitoUser, session);
+        return session;
+      })
+    }
   }
 
   async saveCreds(cognitoUser?:CognitoUser, session?: CognitoUserSession) {
@@ -247,7 +289,7 @@ export class AuthService {
             resolve(user);
           },
           onFailure: (err: any) => {
-            throw err;
+            reject(self.handleError(err, 'signIn'))
           },
           newPasswordRequired: (userAttributes, requiredAttributes) => {
             cognitoUser.completeNewPasswordChallenge(creds.password, requiredAttributes, {

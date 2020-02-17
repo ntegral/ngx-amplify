@@ -353,7 +353,7 @@
   <h2>Login Form</h2>
   <p>AWS Cognito:</p>
 
-  <div class="card-container">
+  <div class="card-container" *ngIf="!authUser.authenticated">
     <form class="card" [formGroup]="loginForm">
       <div>
         <input class="form-control" type="text" placeholder="Username" formControlName="username">
@@ -362,13 +362,13 @@
         <input class="form-control" type="password" placeholder="Password" formControlName="password">
       </div>
       <div>
-        <button type="button"
+        <button type="submit"
           (click)="onEvent('login')" [disabled]="!loginForm.valid">Log In</button>
       </div>
     </form>
   </div>
 
-  <div class="card-container">
+  <div class="card-container" *ngIf="authUser.authenticated">
     <div class="card card-small" (click)="selection.value = 'component'" tabindex="0">
       <svg class="material-icons" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
         <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" /></svg>
