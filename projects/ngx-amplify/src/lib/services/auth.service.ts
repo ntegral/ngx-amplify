@@ -22,9 +22,10 @@ export class AuthService {
   private authUserState: BehaviorSubject<IAuthUserState> = new BehaviorSubject({ state: 'signedOut', user: null });
   authUserState$: Observable<IAuthUserState> = this.authUserState.asObservable();
 
-  private cognitoUserSub: BehaviorSubject<CognitoUser> = new BehaviorSubject(null);
-  cognitoUser$: Observable<CognitoUser> = this.cognitoUserSub.asObservable();
+  // private cognitoUserSub: BehaviorSubject<CognitoUser> = new BehaviorSubject(null);
   cognitoUser: CognitoUser;
+  private cognitoUserSub: BehaviorSubject<CognitoUser> = new BehaviorSubject(this.cognitoUser);
+  cognitoUser$: Observable<CognitoUser> = this.cognitoUserSub.asObservable();
   user: IAuthUser;
 
   constructor(
@@ -40,7 +41,7 @@ export class AuthService {
     this.user = AuthUser.Factory();
     // this.authUserState.next({ state: 'signedOut', user: this.user });
     // this.refreshOrResetCreds();
-    this.currentAuthUser();
+    // this.currentAuthUser = this.currentAuthUser.bind(this);
   }
 
   private authDetails(creds: ICognitoCredentials): AuthenticationDetails {
@@ -183,7 +184,7 @@ export class AuthService {
   }
 
   private resetCreds (clearCache:boolean = false) {
-    console.log('Resetting credentials for unauth access');
+    // console.log('Resetting credentials for unauth access');
     this.resetting = true;
     AWS.config.region = this.config.region;
     this.cognitoUser = null;
@@ -198,8 +199,9 @@ export class AuthService {
     let self = this;
 
     let user = this.userPool.getCurrentUser();
+    // console.log('auth:currentAuthUser', user);
     if (user !== null) {
-      await this.refreshSession();
+      await this.refreshSession(user);
     } /* else {
       self.authState.next({state: 'signedOut', user: user });
       self.cognitoUserSub.next(user);
@@ -237,13 +239,27 @@ export class AuthService {
       });
     } else {
 
-      return self.cognitoUser.getSession(async (err, session: CognitoUserSession) => {
+      /* return self.cognitoUser.getSession(async (err, session: CognitoUserSession) => {
         if (err) { console.log('Error refreshing user session', err); return err; }
         console.log(`${new Date()} - Refreshed session for ${self.cognitoUser.getUsername()}. Valid?: `, session.isValid());
         self.session = session;
         self.cognitoUser.setSignInUserSession(session);
         await self.saveCreds(self.cognitoUser, session);
         return session;
+      }) */
+
+      return new Promise(async(resolve, reject) => {
+        self.cognitoUser.getSession(async(err, session: CognitoUserSession) => {
+          if (err) {
+            console.log('Error refreshing user session', err);
+            reject(err);
+          }
+          // console.log(`${new Date()} - Refreshed session for ${self.cognitoUser.getUsername()}. Valid?: `, session.isValid());
+          self.session = session;
+          self.cognitoUser.setSignInUserSession(session);
+          await self.saveCreds(self.cognitoUser, session);
+          resolve(session);
+        })
       })
     }
   }

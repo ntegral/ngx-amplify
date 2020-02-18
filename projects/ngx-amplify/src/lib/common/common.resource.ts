@@ -26,7 +26,7 @@ export class AuthUser implements IAuthUser {
     }
 
     set(values: Object = {}) {
-        Object.assign({},this, values);
+        Object.assign(this, values);
     }
 }
 
@@ -45,7 +45,7 @@ export class CognitoException implements ICognitoException {
     time: Date;
 
     constructor(values:Object = {}){
-        Object.assign({}, this, values);
+        Object.assign(this, values);
     }
 }
 
@@ -76,7 +76,7 @@ export class CognitoProfile implements ICognitoProfile {
     contact_id__c?: string;
 
     constructor(values:Object = {}){
-        Object.assign({}, this, values);
+        Object.assign(this, values);
     }
 
     static Factory() {
